@@ -152,7 +152,10 @@ class MilvusVectorStore(VectorStore):
             self._create_index()
         # If using an existing index and no search params were provided,
         #   generate the correct params
-        elif self.collection is not None and self.search_params is None:
+        # If using an existing index and no search params were provided,
+        #   generate the correct params
+        if self.collection is not None and self.search_params is None:
+            self._create_search_params()
             self._create_search_params()
 
         # If there is a collection with an index, make sure its loaded

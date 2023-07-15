@@ -174,14 +174,12 @@ class SimpleDirectoryReader(BaseReader):
     def load_data(self) -> List[Document]:
         """Load data from the input directory.
 
-        Args:
-            concatenate (bool): whether to concatenate all text docs into a single doc.
-                If set to True, file metadata is ignored. False by default.
-                This setting does not apply to image docs (always one doc per image).
+        '''Load data from the input directory.
 
         Returns:
             List[Document]: A list of documents.
 
+        '''
         """
         documents = []
         for input_file in self.input_files:

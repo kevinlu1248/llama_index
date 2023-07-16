@@ -77,6 +77,7 @@ class ServiceContext:
         llm: Optional[LLMType] = None,
         prompt_helper: Optional[PromptHelper] = None,
         embed_model: Optional[Union[BaseEmbedding, str]] = None,
+        query_embed_model: Optional[Union[BaseEmbedding, str]] = None,
         node_parser: Optional[NodeParser] = None,
         llama_logger: Optional[LlamaLogger] = None,
         callback_manager: Optional[CallbackManager] = None,
@@ -116,23 +117,23 @@ class ServiceContext:
             )
             chunk_size = chunk_size_limit
 
-        if isinstance(embed_model, str):
-            splits = embed_model.split(":", 1)
+        if isinstance(query_embed_model, str):
+            splits = query_embed_model.split(":", 1)
             is_local = splits[0]
             model_name = splits[1] if len(splits) > 1 else None
             if is_local != "local":
                 raise ValueError(
-                    "embed_model must start with str 'local' or of type BaseEmbedding"
+                    "query_embed_model must start with str 'local' or of type BaseEmbedding"
                 )
             try:
                 from langchain.embeddings import HuggingFaceEmbeddings
             except ImportError as exc:
                 raise ImportError(
                     "Could not import sentence_transformers or langchain package. "
-                    "Please install with `pip install sentence-transformers langchain`."
+                    "Please install with `pip install sentence_transformers langchain`."
                 ) from exc
 
-            embed_model = LangchainEmbedding(
+            query_embed_model = LangchainEmbedding(
                 HuggingFaceEmbeddings(
                     model_name=model_name or DEFAULT_HUGGINGFACE_EMBEDDING_MODEL
                 )
@@ -260,5 +261,4 @@ class ServiceContext:
 
 
 def set_global_service_context(service_context: Optional[ServiceContext]) -> None:
-    """Helper function to set the global service context."""
     llama_index.global_service_context = service_context

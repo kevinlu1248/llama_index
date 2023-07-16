@@ -69,12 +69,15 @@ class GPTIndexMemory(Memory):
         prompt_input_key = self._get_prompt_input_key(inputs)
         query_str = inputs[prompt_input_key]
 
-        # TODO: wrap in prompt
-        # TODO: add option to return the raw text
-        # NOTE: currently it's a hack
+        print(f"Loading memory variables with query string: {query_str}")
+
         query_engine = self.index.as_query_engine(**self.query_kwargs)
-        response = query_engine.query(query_str)
-        return {self.memory_key: str(response)}
+        response_obj = query_engine.query(query_str)
+        response = str(response_obj)
+
+        print(f"Loaded memory variables: {response}")
+
+        return {self.memory_key: response}
 
     def save_context(self, inputs: Dict[str, Any], outputs: Dict[str, str]) -> None:
         """Save the context of this model run to memory."""
@@ -138,31 +141,23 @@ class GPTIndexChatMemory(BaseChatMemory):
         return prompt_input_key
 
     def load_memory_variables(self, inputs: Dict[str, Any]) -> Dict[str, str]:
-        """Return key-value pairs given the text input to the chain."""
+        '''Return key-value pairs given the text input to the chain.'''
         prompt_input_key = self._get_prompt_input_key(inputs)
         query_str = inputs[prompt_input_key]
 
+        print(f"Loading memory variables with query string: {query_str}")
+
         query_engine = self.index.as_query_engine(**self.query_kwargs)
         response_obj = query_engine.query(query_str)
-        if self.return_source:
-            source_nodes = response_obj.source_nodes
-            if self.return_messages:
-                # get source messages from ids
-                source_ids = [sn.node.node_id for sn in source_nodes]
-                source_messages = [
-                    m for id, m in self.id_to_message.items() if id in source_ids
-                ]
-                # NOTE: type List[BaseMessage]
-                response: Any = source_messages
-            else:
-                source_texts = [sn.node.get_content() for sn in source_nodes]
-                response = "\n\n".join(source_texts)
-        else:
-            response = str(response_obj)
+        response = str(response_obj)
+
+        print(f"Loaded memory variables: {response}")
+
         return {self.memory_key: response}
 
+
     def save_context(self, inputs: Dict[str, Any], outputs: Dict[str, str]) -> None:
-        """Save the context of this model run to memory."""
+        '''Save the context of this model run to memory.'''
         prompt_input_key = self._get_prompt_input_key(inputs)
         if self.output_key is None:
             if len(outputs) != 1:
@@ -171,8 +166,8 @@ class GPTIndexChatMemory(BaseChatMemory):
         else:
             output_key = self.output_key
 
-        # a bit different than existing langchain implementation
-        # because we want to track id's for messages
+        print(f"Saving context with input: {inputs[prompt_input_key]}, output: {outputs[output_key]}")
+
         human_message = HumanMessage(content=inputs[prompt_input_key])
         human_message_id = get_new_id(set(self.id_to_message.keys()))
         ai_message = AIMessage(content=outputs[output_key])
@@ -192,6 +187,9 @@ class GPTIndexChatMemory(BaseChatMemory):
         ai_doc = Document(text=ai_txt, id_=ai_message_id)
         self.index.insert(human_doc)
         self.index.insert(ai_doc)
+
+        print(f"Saved context with human doc: {human_doc}, ai doc: {ai_doc}")
+
 
     def clear(self) -> None:
         """Clear memory contents."""

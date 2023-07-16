@@ -75,6 +75,7 @@ class ComposableGraph:
                 # set summaries for each index
                 for index, summary in zip(children_indices, index_summaries):
                     index.index_struct.summary = summary
+                    index.text = summary
 
             if len(children_indices) != len(index_summaries):
                 raise ValueError("indices and index_summaries must have same length!")
@@ -84,7 +85,7 @@ class ComposableGraph:
             for index, summary in zip(children_indices, index_summaries):
                 assert isinstance(index.index_struct, IndexStruct)
                 index_node = IndexNode(
-                    text=summary,
+                    text=index.text,
                     index_id=index.index_id,
                     relationships={
                         NodeRelationship.SOURCE: RelatedNodeInfo(

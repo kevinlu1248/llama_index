@@ -260,5 +260,6 @@ class ServiceContext:
         return self.llm_predictor.llm
 
 
+"""Helper function to set the global service context."""
 def set_global_service_context(service_context: Optional[ServiceContext]) -> None:
     llama_index.global_service_context = service_context

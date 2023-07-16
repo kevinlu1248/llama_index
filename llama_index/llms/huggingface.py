@@ -100,6 +100,12 @@ class HuggingFaceLLM(CustomLLM):
         self._stopping_criteria = StoppingCriteriaList([StopOnTokens()])
 
     @property
+    def metadata(self) -> LLMMetadata:
+        """LLM metadata."""
+        return LLMMetadata(
+            context_window=self._context_window, num_output=self._max_new_tokens
+        )
+    
     def complete(self, prompt: str, **kwargs: Any) -> CompletionResponse:
         '''Completion endpoint.'''
 

@@ -106,14 +106,20 @@ class BaseOpenAIAgent(BaseAgent):
         if chat_history is not None:
             self._memory.set(chat_history)
 
+        print(f"Set chat history: {self._memory.get_all()}")
+
         tools, functions = self._init_chat(message)
         sources = []
+
+        print(f"Initialized chat with tools: {tools}, functions: {functions}")
 
         # TODO: Support forced function call
         all_messages = self._prefix_messages + self._memory.get()
         chat_response = self._llm.chat(all_messages, functions=functions)
         ai_message = chat_response.message
         self._memory.put(ai_message)
+
+        print(f"Put AI message in memory: {ai_message}")
 
         n_function_calls = 0
         function_call = self._get_latest_function_call(self._memory.get_all())
@@ -129,6 +135,8 @@ class BaseOpenAIAgent(BaseAgent):
             self._memory.put(function_message)
             n_function_calls += 1
 
+            print(f"Called function and put function message in memory: {function_message}")
+
             # send function call & output back to get another response
             all_messages = self._prefix_messages + self._memory.get()
             chat_response = self._llm.chat(all_messages, functions=functions)
@@ -137,6 +145,7 @@ class BaseOpenAIAgent(BaseAgent):
             function_call = self._get_latest_function_call(self._memory.get_all())
 
         return AgentChatResponse(response=str(ai_message.content), sources=sources)
+
 
     def stream_chat(
         self, message: str, chat_history: Optional[List[ChatMessage]] = None

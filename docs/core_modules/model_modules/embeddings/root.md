@@ -5,7 +5,7 @@ Embeddings are used in LlamaIndex to represent your documents using a sophistica
 
 At a high level, if a user asks a question about dogs, then the embedding for that question will be highly similar to text that talks about dogs.
 
-When calculating the similarity between embeddings, there are many methods to use (dot product, cosine similarity, etc.). By default, LlamaIndex uses cosine similarity when comparing embeddings.
+LlamaIndex also supports asymmetric embeddings, which allow you to use different models or parameters for query and passage embeddings. This can be useful in semantic search where different models or model parameters are used for queries and documents to capture the different nature of these texts.
 
 There are many embedding models to pick from. By default, LlamaIndex uses `text-embedding-ada-002` from OpenAI. We also support any embedding model offered by Langchain [here](https://python.langchain.com/docs/modules/data_connection/text_embedding/), as well as providing an easy to extend base class for implementing your own embeddings.
 

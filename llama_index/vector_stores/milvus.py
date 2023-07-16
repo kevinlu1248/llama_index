@@ -1,3 +1,8 @@
+"""Milvus vector store index.
+
+An index that is built within Milvus.
+
+"""
 import logging
 from typing import Any, List, Optional
 from uuid import uuid4

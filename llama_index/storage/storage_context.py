@@ -96,12 +96,15 @@ class StorageContext:
         graph_store_fname: str = GRAPH_STORE_FNAME,
         fs: Optional[fsspec.AbstractFileSystem] = None,
     ) -> None:
-        """Persist the storage context.
-
+        '''Persist the storage context.
         Args:
             persist_dir (str): directory to persist the storage context
-
-        """
+        '''
+        # Check if any summary is null
+        for index in self.index_store.indices.values():
+            if index.index_struct.summary is None:
+                raise ValueError(f"Summary for index {index.index_id} is null. Please set a summary before persisting.")
+        
         if fs is not None:
             docstore_path = concat_dirs(persist_dir, docstore_fname)
             index_store_path = concat_dirs(persist_dir, index_store_fname)

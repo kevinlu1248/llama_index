@@ -118,3 +118,22 @@ You can also use embeddings as a standalone module for your project, existing ap
 ```python
 embeddings = embed_model.get_text_embedding("It is raining cats and dogs here!")
 ```
+## Asymmetric Embeddings
+
+Asymmetric embeddings allow you to use different models or parameters for query and passage embeddings. This can be useful in semantic search where different models or model parameters are used for queries and documents to capture the different nature of these texts.
+
+Here is an example of how to set different models for query and passage embeddings in the `ServiceContext`:
+
+```python
+from llama_index import ServiceContext
+from llama_index.embeddings import OpenAIEmbedding
+
+query_embed_model = OpenAIEmbedding(model_name="text-embedding-ada-002")
+passage_embed_model = OpenAIEmbedding(model_name="text-embedding-ada-003")
+
+service_context = ServiceContext.from_defaults(
+    embed_model=passage_embed_model,
+    query_embed_model=query_embed_model
+)
+```
+In this example, the model "text-embedding-ada-002" is used for query embeddings and the model "text-embedding-ada-003" is used for passage embeddings.

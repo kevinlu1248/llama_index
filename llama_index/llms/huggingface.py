@@ -21,13 +21,16 @@ class HuggingFaceLLM(CustomLLM):
         query_wrapper_prompt: SimpleInputPrompt = DEFAULT_SIMPLE_INPUT_PROMPT,
         tokenizer_name: str = "StabilityAI/stablelm-tuned-alpha-3b",
         model_name: str = "StabilityAI/stablelm-tuned-alpha-3b",
+        query_model_name: str = "StabilityAI/stablelm-tuned-alpha-3b",
         model: Optional[Any] = None,
+        query_model: Optional[Any] = None,
         tokenizer: Optional[Any] = None,
         device_map: str = "auto",
         stopping_ids: Optional[List[int]] = None,
         tokenizer_kwargs: Optional[dict] = None,
         tokenizer_outputs_to_remove: Optional[list] = None,
         model_kwargs: Optional[dict] = None,
+        query_model_kwargs: Optional[dict] = None,
         generate_kwargs: Optional[dict] = None,
     ) -> None:
         """Initialize params."""
@@ -40,6 +43,9 @@ class HuggingFaceLLM(CustomLLM):
         )
 
         model_kwargs = model_kwargs or {}
+        self.query_model = query_model or AutoModelForCausalLM.from_pretrained(
+            query_model_name, device_map=device_map, **(query_model_kwargs or {})
+        )
         self.model = model or AutoModelForCausalLM.from_pretrained(
             model_name, device_map=device_map, **model_kwargs
         )
@@ -99,9 +105,9 @@ class HuggingFaceLLM(CustomLLM):
         return LLMMetadata(
             context_window=self._context_window, num_output=self._max_new_tokens
         )
-
+    
     def complete(self, prompt: str, **kwargs: Any) -> CompletionResponse:
-        """Completion endpoint."""
+        '''Completion endpoint.'''
 
         full_prompt = self._query_wrapper_prompt.format(query_str=prompt)
         if self._system_prompt:
@@ -115,7 +121,8 @@ class HuggingFaceLLM(CustomLLM):
             if key in inputs:
                 inputs.pop(key, None)
 
-        tokens = self.model.generate(
+        model_to_use = self.query_model if self.query_model else self.model
+        tokens = model_to_use.generate(
             **inputs,
             max_new_tokens=self._max_new_tokens,
             stopping_criteria=self._stopping_criteria,

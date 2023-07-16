@@ -1,4 +1,3 @@
-"""Simple reader that reads files of different formats from a directory."""
 import logging
 from pathlib import Path
 from typing import Callable, Dict, Generator, List, Optional, Type
@@ -58,7 +57,7 @@ class SimpleDirectoryReader(BaseReader):
             to text. If not specified, use default from DEFAULT_FILE_READER_CLS.
         num_files_limit (Optional[int]): Maximum number of files to read.
             Default is None.
-        file_metadata (Optional[Callable[str, Dict]]): A function that takes
+        file_metadata (Optional[Callable[[str], Dict]]): A function that takes
             in a filename and returns a Dict of metadata for the Document.
             Default is None.
     """
@@ -171,10 +170,11 @@ class SimpleDirectoryReader(BaseReader):
 
         return new_input_files
 
-    def load_data(self) -> List[Document]:
-        """Load data from the input directory.
+    def load_data(self, pandas_config: Optional[Dict] = None) -> List[Document]:
+        '''Load data from the input directory.
 
         Args:
+            pandas_config (dict): Configuration for pandas read_excel function.
             concatenate (bool): whether to concatenate all text docs into a single doc.
                 If set to True, file metadata is ignored. False by default.
                 This setting does not apply to image docs (always one doc per image).
@@ -182,7 +182,9 @@ class SimpleDirectoryReader(BaseReader):
         Returns:
             List[Document]: A list of documents.
 
-        """
+        '''
+        self._row_joiner = lambda rows: ' '.join(rows)  # Define _row_joiner attribute
+
         documents = []
         for input_file in self.input_files:
             metadata: Optional[dict] = None
@@ -200,7 +202,7 @@ class SimpleDirectoryReader(BaseReader):
                     reader_cls = DEFAULT_FILE_READER_CLS[file_suffix]
                     self.file_extractor[file_suffix] = reader_cls()
                 reader = self.file_extractor[file_suffix]
-                docs = reader.load_data(input_file, extra_info=metadata)
+                docs = reader.load_data(input_file, extra_info=metadata, pandas_config=pandas_config)
 
                 # iterate over docs if needed
                 if self.filename_as_id:
